@@ -396,36 +396,3 @@ if st.button("Genereer Route"):
                 st.markdown("🛢️ **Tankmoment {}:** {}".format(i, name))
         else:
             st.error("Kon geen route genereren met OSRM.")
-import folium
-from folium import Marker
-from folium.plugins import MarkerCluster
-from folium.features import CustomIcon
-
-# Functie om de kaart te maken
-def create_map():
-    # Maak een basiskaart
-    map_ = folium.Map(location=[52.379189, 4.900933], zoom_start=6)  # Pas locatie en zoom in de kaart aan naar wens
-
-    # Voeg een MarkerCluster toe om markers te groeperen
-    marker_cluster = MarkerCluster().add_to(map_)
-
-    # Je tankstations (dit zijn voorbeelden, voeg je eigen data toe)
-    tankstations = [
-        ("Tankstation 1", 52.379189, 4.900933), 
-        ("Tankstation 2", 51.378189, 4.800933)
-    ]
-
-    # Voeg tankstations toe met een aangepaste marker
-    for naam, lat, lon in tankstations:
-        custom_icon = CustomIcon('/mnt/data/Alleen spark.png', icon_size=(30, 30))  # Gebruik je bedrijfslogo als marker
-        folium.Marker([lat, lon], popup=naam, icon=custom_icon).add_to(marker_cluster)
-
-    return map_
-
-# Maak de kaart
-m = create_map()
-
-# Zet de kaart om naar HTML en toon deze in Streamlit
-from streamlit.components.v1 import html
-map_html = m._repr_html_()  # Genereer HTML van de kaart
-html(map_html, height=600)
