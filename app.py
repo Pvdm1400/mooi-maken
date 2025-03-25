@@ -382,11 +382,11 @@ if st.button("Genereer Route"):
                 pitch=0
             )
 
-            st.pydeck_chart(pdk.Deck(layers=[route_layer], initial_view_state=view_state))
-
-
-            st.subheader("📍 OG Tanklocaties op de route")
-            tank_df = pd.DataFrame([
+            st.pydeck_chart(pdk.Deck(
+                layers=[route_layer],
+                initial_view_state=view_state,
+                map_style='light'
+            ))
                 {"Latitude": lat, "Longitude": lon, "Naam": name}
                 for name, lat, lon in used_stations
             ])
