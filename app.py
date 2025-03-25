@@ -2,12 +2,15 @@ import streamlit as st
 import requests
 import pandas as pd
 from geopy.distance import geodesic
-import pydeck as pdk
 from geopy.geocoders import Nominatim
 
-OSRM_SERVER = "https://router.project-osrm.org"
 
 tankstations = [
+    ("ADRIANO OLIVETTI SNC 13048", 45.38002020650739, 8.14634168147584),
+    ("LUIGI GHERZI 15 28100", 45.454214522946366, 8.648874406509199),
+    ("MEZZACAMPAGNA SNC 37135", 45.38885497663997, 10.993260597366502),
+    # Add more stations as needed
+]
     ("ADRIANO OLIVETTI SNC 13048", 45.38002020650739, 8.14634168147584),
     ("LUIGI GHERZI 15 28100", 45.454214522946366, 8.648874406509199),
     ("MEZZACAMPAGNA SNC 37135", 45.38885497663997, 10.993260597366502),
@@ -282,8 +285,7 @@ tankstations = [
 ]
 
 def get_osrm_route(waypoints):
-]  # Properly closing the list comprehension
-    url = f"{OSRM_SERVER}/route/v1/driving/{waypoint_str}?overview=full&geometries=geojson"
+    waypoint_str = ";".join(["{},{}".format(lon, lat) for lat, lon in waypoints])
     response = requests.get(url)
     if response.status_code != 200:
         return []
@@ -293,13 +295,13 @@ def get_osrm_route(waypoints):
     return data['routes'][0]['geometry']['coordinates']
 
 def is_within_corridor(start, end, point, corridor_km=100):
-]  # Properly closing the list comprehension
-]  # Properly closing the list comprehension
-]  # Properly closing the list comprehension
+    d1 = geodesic((start[0], start[1]), (point[1], point[2])).km
+    d2 = geodesic((point[1], point[2]), (end[0], end[1])).km
+    d_total = geodesic((start[0], start[1]), (end[0], end[1])).km
     return abs((d1 + d2) - d_total) <= corridor_km
 
 def build_route_with_filtered_tankstations(start, end, tankstations, interval_km=250, corridor_km=100):
-]  # Properly closing the list comprehension
+    route = get_osrm_route([start, end])
     if not route:
         return [], []
     filtered_tanks = [ts for ts in tankstations if is_within_corridor(start, end, ts)]
@@ -309,20 +311,20 @@ def build_route_with_filtered_tankstations(start, end, tankstations, interval_km
     last_point = route[0]
     for i in range(1, len(route)):
         curr_point = route[i]
-]  # Properly closing the list comprehension
+        step_distance = geodesic((last_point[1], last_point[0]), (curr_point[1], curr_point[0])).km
         total_distance += step_distance
         if total_distance >= interval_km:
             if filtered_tanks:
-]  # Properly closing the list comprehension
+                closest = min(filtered_tanks, key=lambda s: geodesic((curr_point[1], curr_point[0]), (s[1], s[2])).km)
                 if closest not in used_stations:
                     used_stations.append(closest)
-]  # Properly closing the list comprehension
+                    waypoints.append((closest[1], closest[2]))
                 else:
-]  # Properly closing the list comprehension
-]  # Properly closing the list comprehension
+                    used_stations.append(("Geen OG tanklocatie mogelijk", curr_point[1], curr_point[0]))
+                    waypoints.append((curr_point[1], curr_point[0]))
             else:
-]  # Properly closing the list comprehension
-]  # Properly closing the list comprehension
+                used_stations.append(("Geen OG tanklocatie mogelijk", curr_point[1], curr_point[0]))
+                waypoints.append((curr_point[1], curr_point[0]))
             total_distance = 0
         last_point = curr_point
     waypoints.append(end)
@@ -338,7 +340,7 @@ def geocode_address(address):
 # Streamlit UI
 
 
-]  # Properly closing the list comprehension
+col1, col2 = st.columns([1, 8])
 with col1:
     st.image("Alleen spark.png", width=50)
 with col2:
@@ -359,55 +361,35 @@ if st.button("Genereer Route"):
         st.error("Kon één van de adressen niet vinden.")
     else:
         waypoints, used_stations = build_route_with_filtered_tankstations(start, end, tankstations, interval_km=interval_km, corridor_km=corridor_km)
-]  # Properly closing the list comprehension
+        route_coords = get_osrm_route([(wp[0], wp[1]) for wp in waypoints])
         if route_coords:
-]  # Properly closing the list comprehension
+            df = pd.DataFrame(route_coords, columns=["Longitude", "Latitude"])
             df["Route"] = route_name
+            st.map(df.rename(columns={"Latitude": "lat", "Longitude": "lon"}))
 
-            # ✅ Pydeck-kaart met groene route
-            route_df = df.rename(columns={'Longitude': 'lon', 'Latitude': 'lat'})
-            route_layer = pdk.Layer(
-                'LineLayer',
-                data=route_df,
-                get_source_position='[lon, lat]',
-                get_target_position='[lon, lat]',
-                get_color=[0, 200, 0],
-                get_width=5
-            )
-
-            view_state = pdk.ViewState(
-                latitude=route_df['lat'].mean(),
-                longitude=route_df['lon'].mean(),
-                zoom=4,
-                pitch=0
-            )
-
-            st.pydeck_chart(pdk.Deck(
-                layers=[route_layer],
-                initial_view_state=view_state,
-                map_style='light'
-            ))
-    {"Latitude": lat, "Longitude": lon, "Naam": name}
-    for name, lat, lon in used_stations
-]  # Properly closing the list comprehension
+            st.subheader("📍 OG Tanklocaties op de route")
+            tank_df = pd.DataFrame([
+                {"Latitude": lat, "Longitude": lon, "Naam": name}
+                for name, lat, lon in used_stations
+            ])
             st.map(tank_df.rename(columns={"Latitude": "lat", "Longitude": "lon"}))
 
-]  # Properly closing the list comprehension
+            tank_df = tank_df.dropna(subset=["Latitude", "Longitude"])
             
             # Bereken totale routeafstand met tankstops
             totale_afstand = 0
             for i in range(1, len(route_coords)):
                 p1 = route_coords[i - 1]
                 p2 = route_coords[i]
-]  # Properly closing the list comprehension
+                totale_afstand += geodesic((p1[1], p1[0]), (p2[1], p2[0])).km
 
             # Bereken afstand zonder tussenliggende tankstops
-]  # Properly closing the list comprehension
+            originele_coords = get_osrm_route([start, end])
             originele_afstand = 0
             for i in range(1, len(originele_coords)):
                 p1 = originele_coords[i - 1]
                 p2 = originele_coords[i]
-]  # Properly closing the list comprehension
+                originele_afstand += geodesic((p1[1], p1[0]), (p2[1], p2[0])).km
 
             st.write("🛣️ **Totale afstand met OG-tanklocaties:** {:.1f} km".format(totale_afstand))
             st.write("📏 **Afstand zonder tankstops:** {:.1f} km".format(originele_afstand))
@@ -417,3 +399,63 @@ if st.button("Genereer Route"):
                 st.markdown("🛢️ **Tankmoment {}:** {}".format(i, name))
         else:
             st.error("Kon geen route genereren met OSRM.")
+import streamlit as st
+import pydeck as pdk
+
+# Function to generate the route and tankstation markers
+def create_route_visualization(route_coords, used_stations):
+    # Route layer with customizable color
+    route_layer = pdk.Layer(
+        "LineLayer",
+        data=[{"sourcePosition": route_coords[i], "targetPosition": route_coords[i + 1]} for i in range(len(route_coords) - 1)],
+        get_source_position="sourcePosition",
+        get_target_position="targetPosition",
+        get_color=[0, 0, 255],  # Change color as needed
+        width_scale=10,
+        width_min_pixels=5
+    )
+    
+    # Tankstations as markers with spark.png image
+    station_markers = pdk.Layer(
+        "ScatterplotLayer",
+        data=[{"position": (lon, lat), "image": "spark.png"} for _, lat, lon in used_stations],
+        get_position="position",
+        get_radius=100,
+        get_fill_color=[255, 0, 0],  # Red color for markers
+        pickable=True
+    )
+    
+    # Set the initial view for the map
+    initial_view = pdk.ViewState(
+        longitude=route_coords[0][0],
+        latitude=route_coords[0][1],
+        zoom=6,
+        pitch=0
+    )
+    
+    # Create deck with both layers: route and tankstation markers
+    deck = pdk.Deck(
+        layers=[route_layer, station_markers],
+        initial_view_state=initial_view,
+        map_style='light'
+    )
+    
+    return deck
+
+# Example route coordinates (replace with real data)
+route_coords_example = [(8.14634168147584, 45.38002020650739), (8.648874406509199, 45.454214522946366)]
+
+# Example tankstations (replace with real data)
+used_stations_example = [("ADRIANO OLIVETTI SNC 13048", 45.38002020650739, 8.14634168147584),
+                         ("LUIGI GHERZI 15 28100", 45.454214522946366, 8.648874406509199)]
+
+# Generate the visualization
+deck = create_route_visualization(route_coords_example, used_stations_example)
+
+# Show the visualization
+deck.show()
+
+# Add the dynamic list of tank moments as in Tesla interface
+st.sidebar.header("Tankstations langs de route")
+for station in used_stations_example:
+    st.sidebar.write(f"{station[0]} - {station[1]}, {station[2]}")
