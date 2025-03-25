@@ -422,3 +422,4 @@ stations_info = [
         else:
             st.error("Kon geen route genereren met OSRM.")]
 ]  # Closing the list comprehension correctly
+]  # Closing the list comprehension correctly
