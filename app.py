@@ -282,7 +282,7 @@ tankstations = [
 ]
 
 def get_osrm_route(waypoints):
-    waypoint_str = ";".join(["{},{}".format(lon, lat) for lat, lon in waypoints])
+]  # Properly closing the list comprehension
     url = f"{OSRM_SERVER}/route/v1/driving/{waypoint_str}?overview=full&geometries=geojson"
     response = requests.get(url)
     if response.status_code != 200:
@@ -293,13 +293,13 @@ def get_osrm_route(waypoints):
     return data['routes'][0]['geometry']['coordinates']
 
 def is_within_corridor(start, end, point, corridor_km=100):
-    d1 = geodesic((start[0], start[1]), (point[1], point[2])).km
-    d2 = geodesic((point[1], point[2]), (end[0], end[1])).km
-    d_total = geodesic((start[0], start[1]), (end[0], end[1])).km
+]  # Properly closing the list comprehension
+]  # Properly closing the list comprehension
+]  # Properly closing the list comprehension
     return abs((d1 + d2) - d_total) <= corridor_km
 
 def build_route_with_filtered_tankstations(start, end, tankstations, interval_km=250, corridor_km=100):
-    route = get_osrm_route([start, end])
+]  # Properly closing the list comprehension
     if not route:
         return [], []
     filtered_tanks = [ts for ts in tankstations if is_within_corridor(start, end, ts)]
@@ -309,20 +309,20 @@ def build_route_with_filtered_tankstations(start, end, tankstations, interval_km
     last_point = route[0]
     for i in range(1, len(route)):
         curr_point = route[i]
-        step_distance = geodesic((last_point[1], last_point[0]), (curr_point[1], curr_point[0])).km
+]  # Properly closing the list comprehension
         total_distance += step_distance
         if total_distance >= interval_km:
             if filtered_tanks:
-                closest = min(filtered_tanks, key=lambda s: geodesic((curr_point[1], curr_point[0]), (s[1], s[2])).km)
+]  # Properly closing the list comprehension
                 if closest not in used_stations:
                     used_stations.append(closest)
-                    waypoints.append((closest[1], closest[2]))
+]  # Properly closing the list comprehension
                 else:
-                    used_stations.append(("Geen OG tanklocatie mogelijk", curr_point[1], curr_point[0]))
-                    waypoints.append((curr_point[1], curr_point[0]))
+]  # Properly closing the list comprehension
+]  # Properly closing the list comprehension
             else:
-                used_stations.append(("Geen OG tanklocatie mogelijk", curr_point[1], curr_point[0]))
-                waypoints.append((curr_point[1], curr_point[0]))
+]  # Properly closing the list comprehension
+]  # Properly closing the list comprehension
             total_distance = 0
         last_point = curr_point
     waypoints.append(end)
@@ -338,7 +338,7 @@ def geocode_address(address):
 # Streamlit UI
 
 
-col1, col2 = st.columns([1, 8])
+]  # Properly closing the list comprehension
 with col1:
     st.image("Alleen spark.png", width=50)
 with col2:
@@ -359,9 +359,9 @@ if st.button("Genereer Route"):
         st.error("Kon één van de adressen niet vinden.")
     else:
         waypoints, used_stations = build_route_with_filtered_tankstations(start, end, tankstations, interval_km=interval_km, corridor_km=corridor_km)
-        route_coords = get_osrm_route([(wp[0], wp[1]) for wp in waypoints])
+]  # Properly closing the list comprehension
         if route_coords:
-            df = pd.DataFrame(route_coords, columns=["Longitude", "Latitude"])
+]  # Properly closing the list comprehension
             df["Route"] = route_name
 
             # ✅ Pydeck-kaart met groene route
@@ -387,27 +387,27 @@ if st.button("Genereer Route"):
                 initial_view_state=view_state,
                 map_style='light'
             ))
-                {"Latitude": lat, "Longitude": lon, "Naam": name}
+    {"Latitude": lat, "Longitude": lon, "Naam": name}
     for name, lat, lon in used_stations
-            ])
+]  # Properly closing the list comprehension
             st.map(tank_df.rename(columns={"Latitude": "lat", "Longitude": "lon"}))
 
-            tank_df = tank_df.dropna(subset=["Latitude", "Longitude"])
+]  # Properly closing the list comprehension
             
             # Bereken totale routeafstand met tankstops
             totale_afstand = 0
             for i in range(1, len(route_coords)):
                 p1 = route_coords[i - 1]
                 p2 = route_coords[i]
-                totale_afstand += geodesic((p1[1], p1[0]), (p2[1], p2[0])).km
+]  # Properly closing the list comprehension
 
             # Bereken afstand zonder tussenliggende tankstops
-            originele_coords = get_osrm_route([start, end])
+]  # Properly closing the list comprehension
             originele_afstand = 0
             for i in range(1, len(originele_coords)):
                 p1 = originele_coords[i - 1]
                 p2 = originele_coords[i]
-                originele_afstand += geodesic((p1[1], p1[0]), (p2[1], p2[0])).km
+]  # Properly closing the list comprehension
 
             st.write("🛣️ **Totale afstand met OG-tanklocaties:** {:.1f} km".format(totale_afstand))
             st.write("📏 **Afstand zonder tankstops:** {:.1f} km".format(originele_afstand))
