@@ -382,7 +382,9 @@ if st.button("Genereer Route"):
                 pitch=0
             )
 
-            st.pydeck_chart(pdk.Deck(
+stations_info = [
+    {"Latitude": lat, "Longitude": lon, "Naam": name}
+    for name, lat, lon in used_stations
                 layers=[route_layer],
                 initial_view_state=view_state,
                 map_style='light'
@@ -416,4 +418,4 @@ if st.button("Genereer Route"):
             for i, (name, _, _) in enumerate(used_stations, 1):
                 st.markdown("🛢️ **Tankmoment {}:** {}".format(i, name))
         else:
-            st.error("Kon geen route genereren met OSRM.")
+            st.error("Kon geen route genereren met OSRM.")]
