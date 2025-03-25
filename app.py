@@ -385,6 +385,8 @@ if st.button("Genereer Route"):
 stations_info = [
     {"Latitude": lat, "Longitude": lon, "Naam": name}
     for name, lat, lon in used_stations
+    {"Latitude": lat, "Longitude": lon, "Naam": name}
+    for name, lat, lon in used_stations
                 layers=[route_layer],
                 initial_view_state=view_state,
                 map_style='light'
@@ -419,3 +421,4 @@ stations_info = [
                 st.markdown("🛢️ **Tankmoment {}:** {}".format(i, name))
         else:
             st.error("Kon geen route genereren met OSRM.")]
+]  # Closing the list comprehension correctly
