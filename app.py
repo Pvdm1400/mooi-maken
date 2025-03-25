@@ -4,6 +4,7 @@ import pandas as pd
 from geopy.distance import geodesic
 from geopy.geocoders import Nominatim
 
+OSRM_SERVER = "https://router.project-osrm.org"
 
 tankstations = [
     ("ADRIANO OLIVETTI SNC 13048", 45.38002020650739, 8.14634168147584),
@@ -281,6 +282,7 @@ tankstations = [
 
 def get_osrm_route(waypoints):
     waypoint_str = ";".join(["{},{}".format(lon, lat) for lat, lon in waypoints])
+    url = f"{OSRM_SERVER}/route/v1/driving/{waypoint_str}?overview=full&geometries=geojson"
     response = requests.get(url)
     if response.status_code != 200:
         return []
@@ -394,74 +396,36 @@ if st.button("Genereer Route"):
                 st.markdown("🛢️ **Tankmoment {}:** {}".format(i, name))
         else:
             st.error("Kon geen route genereren met OSRM.")
-import streamlit as st
-import pydeck as pdk
+import folium
+from folium import Marker
+from folium.plugins import MarkerCluster
+from folium.features import CustomIcon
 
-# Function to generate the route and tankstation markers
-def create_route_visualization(route_coords, used_stations):
-    # Route layer with customizable color
-    route_layer = pdk.Layer(
-        "LineLayer",
-        data=[{"sourcePosition": route_coords[i], "targetPosition": route_coords[i + 1]} for i in range(len(route_coords) - 1)],
-        get_source_position="sourcePosition",
-        get_target_position="targetPosition",
-        get_color=[0, 0, 255],  # Change color as needed
-        width_scale=10,
-        width_min_pixels=5
-    )
-    
-    # Tankstations as markers with spark.png image
-    station_markers = pdk.Layer(
-        "ScatterplotLayer",
-        data=[{"position": (lon, lat), "image": "spark.png"} for _, lat, lon in used_stations],
-        get_position="position",
-        get_radius=100,
-        get_fill_color=[255, 0, 0],  # Red color for markers
-        pickable=True
-    )
-    
-    # Set the initial view for the map
-    initial_view = pdk.ViewState(
-        longitude=route_coords[0][0],
-        latitude=route_coords[0][1],
-        zoom=6,
-        pitch=0
-    )
-    
-    # Create deck with both layers: route and tankstation markers
-    deck = pdk.Deck(
-        layers=[route_layer, station_markers],
-        initial_view_state=initial_view,
-        map_style='light'
-    )
-    
-    return deck
+# Functie om de kaart te maken
+def create_map():
+    # Maak een basiskaart
+    map_ = folium.Map(location=[52.379189, 4.900933], zoom_start=6)  # Pas locatie en zoom in de kaart aan naar wens
 
-# Example route coordinates (replace with real data)
-route_coords_example = [(8.14634168147584, 45.38002020650739), (8.648874406509199, 45.454214522946366)]
+    # Voeg een MarkerCluster toe om markers te groeperen
+    marker_cluster = MarkerCluster().add_to(map_)
 
-# Example tankstations (replace with real data)
-used_stations_example = [("ADRIANO OLIVETTI SNC 13048", 45.38002020650739, 8.14634168147584),
-                         ("LUIGI GHERZI 15 28100", 45.454214522946366, 8.648874406509199)]
+    # Je tankstations (dit zijn voorbeelden, voeg je eigen data toe)
+    tankstations = [
+        ("Tankstation 1", 52.379189, 4.900933), 
+        ("Tankstation 2", 51.378189, 4.800933)
+    ]
 
-# Generate the visualization
-deck = create_route_visualization(route_coords_example, used_stations_example)
+    # Voeg tankstations toe met een aangepaste marker
+    for naam, lat, lon in tankstations:
+        custom_icon = CustomIcon('/mnt/data/Alleen spark.png', icon_size=(30, 30))  # Gebruik je bedrijfslogo als marker
+        folium.Marker([lat, lon], popup=naam, icon=custom_icon).add_to(marker_cluster)
 
-# Show the visualization
-deck.show()
+    return map_
 
-# Display route information in the sidebar after generating the route
-if route_coords_example:
-    st.sidebar.header("Routeinformatie")
-    st.sidebar.write(f"Totale afstand met OG-tanklocaties: 1844.8 km")
-    st.sidebar.write(f"Afstand zonder tankstops: 1703.8 km")
-    
-    # Display tank stations in the sidebar
-    st.sidebar.write("Tankmomenten langs de route:")
-    for index, station in enumerate(used_stations_example):
-        st.sidebar.write(f"Tankmoment {index + 1}: {station[0]} - {station[1]}, {station[2]}")
+# Maak de kaart
+m = create_map()
 
-# Add the dynamic list of tank moments as in Tesla interface
-st.sidebar.header("Tankstations langs de route")
-for station in used_stations_example:
-    st.sidebar.write(f"{station[0]} - {station[1]}, {station[2]}")
+# Zet de kaart om naar HTML en toon deze in Streamlit
+from streamlit.components.v1 import html
+map_html = m._repr_html_()  # Genereer HTML van de kaart
+html(map_html, height=600)
