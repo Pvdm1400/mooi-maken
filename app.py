@@ -4,6 +4,7 @@ import pandas as pd
 from geopy.distance import geodesic
 from geopy.geocoders import Nominatim
 
+OSRM_SERVER = "https://router.project-osrm.org"
 
 tankstations = [
     ("ADRIANO OLIVETTI SNC 13048", 45.38002020650739, 8.14634168147584),
@@ -281,6 +282,7 @@ tankstations = [
 
 def get_osrm_route(waypoints):
     waypoint_str = ";".join(["{},{}".format(lon, lat) for lat, lon in waypoints])
+    url = f"{OSRM_SERVER}/route/v1/driving/{waypoint_str}?overview=full&geometries=geojson"
     response = requests.get(url)
     if response.status_code != 200:
         return []
@@ -394,7 +396,6 @@ if st.button("Genereer Route"):
                 st.markdown("🛢️ **Tankmoment {}:** {}".format(i, name))
         else:
             st.error("Kon geen route genereren met OSRM.")
-import streamlit as st
 import pydeck as pdk
 
 # Function to generate the route and tankstation markers
