@@ -1,0 +1,13 @@
+
+# config.toml
+[theme]
+primaryColor = "#1d3557"
+backgroundColor = "#f0f4f8"
+secondaryBackgroundColor = "#ffffff"
+textColor = "#1d3557"
+font = "sans serif"
+
+[server]
+headless = true
+port = 8501
+enableCORS = false
