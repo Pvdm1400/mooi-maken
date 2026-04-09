@@ -1266,26 +1266,37 @@ st.markdown("""
 [data-testid="stSidebar"] h1, [data-testid="stSidebar"] h2,
 [data-testid="stSidebar"] h3 { color: #ffffff !important; font-weight: 700 !important; }
 
-/* Inputs in sidebar */
+/* Inputs in sidebar — witte achtergrond, zwarte tekst */
 [data-testid="stSidebar"] .stTextInput input,
 [data-testid="stSidebar"] .stNumberInput input {
-    background: rgba(255,255,255,0.18) !important;
-    border: 1px solid rgba(255,255,255,0.5) !important;
+    background: #ffffff !important;
+    border: 1px solid rgba(255,255,255,0.6) !important;
     border-radius: 6px !important;
-    color: #ffffff !important;
+    color: #1A1A1A !important;
 }
 [data-testid="stSidebar"] .stTextInput input::placeholder,
 [data-testid="stSidebar"] .stNumberInput input::placeholder {
-    color: rgba(255,255,255,0.65) !important;
+    color: #999999 !important;
 }
 [data-testid="stSidebar"] .stSelectbox > div > div {
-    background: rgba(255,255,255,0.18) !important;
-    border: 1px solid rgba(255,255,255,0.5) !important;
+    background: #ffffff !important;
+    border: 1px solid rgba(255,255,255,0.6) !important;
     border-radius: 6px !important;
-    color: #ffffff !important;
+    color: #1A1A1A !important;
 }
+
+/* Sliders — oranje */
 [data-testid="stSidebar"] .stSlider [data-baseweb="slider"] { margin-top: 4px; }
-[data-testid="stSidebar"] [data-baseweb="slider"] div { background: rgba(255,255,255,0.35) !important; }
+[data-testid="stSidebar"] [data-baseweb="slider"] [role="slider"] {
+    background: #F18700 !important;
+    border-color: #F18700 !important;
+}
+[data-testid="stSidebar"] [data-baseweb="slider"] div[data-testid="stSliderThumb"] {
+    background: #F18700 !important;
+}
+[data-testid="stSidebar"] [data-baseweb="slider"] > div > div:nth-child(2) {
+    background: #F18700 !important;
+}
 [data-testid="stSidebar"] .stRadio label { color: #ffffff !important; }
 [data-testid="stSidebar"] hr { border-color: rgba(255,255,255,0.3) !important; }
 
