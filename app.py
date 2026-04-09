@@ -425,12 +425,12 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
 }
 
 LANG_OPTIONS = {
-    "🇳🇱 NL": "nl",
-    "🇬🇧 EN": "en",
-    "🇩🇪 DE": "de",
-    "🇫🇷 FR": "fr",
-    "🇮🇹 IT": "it",
-    "🇸🇪 SE": "sv",
+    "🇳🇱": "nl",
+    "🇬🇧": "en",
+    "🇩🇪": "de",
+    "🇫🇷": "fr",
+    "🇮🇹": "it",
+    "🇸🇪": "sv",
 }
 
 
@@ -1283,6 +1283,10 @@ st.markdown("""
     border: 1px solid rgba(255,255,255,0.6) !important;
     border-radius: 6px !important;
     color: #1A1A1A !important;
+}
+/* Taal-selectbox smal houden (alleen vlag) */
+[data-testid="stSidebar"] .stSelectbox {
+    max-width: 80px !important;
 }
 
 /* Sliders — oranje */
