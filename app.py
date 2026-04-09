@@ -907,13 +907,17 @@ def bereken_brandstof_per_route(
 # Logo / Spark helpers
 # ---------------------------------------------------------------------------
 def _logo_b64() -> str:
-    """Leest logo.svg en geeft base64-string terug."""
-    logo_path = os.path.join(os.path.dirname(__file__), "logo.svg")
-    try:
-        with open(logo_path, "rb") as f:
-            return base64.b64encode(f.read()).decode()
-    except Exception:
-        return ""
+    """Leest het officiële OG Clean Fuels logo (wit SVG) en geeft base64-string terug."""
+    # Probeer eerst het logo uit de huisstijl-skill, dan de werkmap-versie
+    for fname in ("logo_skill.svg", "logo.svg"):
+        logo_path = os.path.join(os.path.dirname(__file__), fname)
+        if os.path.exists(logo_path):
+            try:
+                with open(logo_path, "rb") as f:
+                    return base64.b64encode(f.read()).decode()
+            except Exception:
+                pass
+    return ""
 
 
 def _spark_b64() -> str:
@@ -1239,119 +1243,109 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# ── Global CSS — OG Clean Fuels huisstijl (Brandbook 2026) ──────────────────
-# Primaire kleuren: Groen #3DBE29 · Oranje #F18700
-# Lettertype: Barlow Condensed (headlines) + Inter (body)
+# ── Global CSS — OG Clean Fuels huisstijl ───────────────────────────────────
+# Kleuren per huisstijl.skill: Groen #13A538 · Oranje #F18700 · Tekst #1A1A1A
+# Lettertype: Open Sans (Google Fonts fallback voor KOMU B)
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&display=swap');
 
-/* ── Achtergrond ── */
+/* ── Hoofdachtergrond: licht en clean ── */
 [data-testid="stAppViewContainer"] {
-    background: linear-gradient(150deg, #0d1f0a 0%, #1a3d14 50%, #0d2e09 100%);
-    font-family: 'Inter', 'Open Sans', sans-serif;
+    background: #f4f6f4;
+    font-family: 'Open Sans', sans-serif;
 }
 [data-testid="stHeader"] { background: transparent; }
+[data-testid="stMain"] { background: #f4f6f4; }
 
-/* ── Sidebar ── */
+/* ── Sidebar: OG groen met witte tekst ── */
 [data-testid="stSidebar"] {
-    background: linear-gradient(180deg, #111111 0%, #1a3014 100%);
-    border-right: 2px solid #3DBE29;
+    background: #13A538;
 }
-[data-testid="stSidebar"] * { color: #dddddd !important; }
+[data-testid="stSidebar"] * { color: #ffffff !important; }
 [data-testid="stSidebar"] h1, [data-testid="stSidebar"] h2,
-[data-testid="stSidebar"] h3 { color: #ffffff !important; }
+[data-testid="stSidebar"] h3 { color: #ffffff !important; font-weight: 700 !important; }
+
+/* Inputs in sidebar */
 [data-testid="stSidebar"] .stTextInput input,
 [data-testid="stSidebar"] .stNumberInput input {
-    background: #1e1e1e !important;
-    border: 1px solid #3DBE29 !important;
+    background: rgba(255,255,255,0.18) !important;
+    border: 1px solid rgba(255,255,255,0.5) !important;
     border-radius: 6px !important;
     color: #ffffff !important;
 }
-[data-testid="stSidebar"] .stSelectbox div[data-baseweb="select"] {
-    background: #1e1e1e !important;
-    border: 1px solid #3DBE29 !important;
+[data-testid="stSidebar"] .stTextInput input::placeholder,
+[data-testid="stSidebar"] .stNumberInput input::placeholder {
+    color: rgba(255,255,255,0.65) !important;
+}
+[data-testid="stSidebar"] .stSelectbox > div > div {
+    background: rgba(255,255,255,0.18) !important;
+    border: 1px solid rgba(255,255,255,0.5) !important;
     border-radius: 6px !important;
+    color: #ffffff !important;
 }
 [data-testid="stSidebar"] .stSlider [data-baseweb="slider"] { margin-top: 4px; }
-[data-testid="stSidebar"] .stRadio label { color: #dddddd !important; }
+[data-testid="stSidebar"] [data-baseweb="slider"] div { background: rgba(255,255,255,0.35) !important; }
+[data-testid="stSidebar"] .stRadio label { color: #ffffff !important; }
+[data-testid="stSidebar"] hr { border-color: rgba(255,255,255,0.3) !important; }
 
-/* ── Taalknopjes ── */
-.lang-btn-row { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 12px; }
-.lang-btn {
-    background: #1e3a18;
-    border: 1px solid #3DBE29;
-    border-radius: 4px;
-    color: #cccccc;
-    font-size: .75rem;
-    padding: 3px 8px;
-    cursor: pointer;
-}
-.lang-btn.active { background: #3DBE29; color: #000; font-weight: 700; }
-
-/* ── Primaire knop ── */
+/* ── Oranje primaire knop ── */
 button[kind="primary"] {
     background: #F18700 !important;
     border: none !important;
     border-radius: 6px !important;
     font-weight: 700 !important;
-    font-family: 'Barlow Condensed', sans-serif !important;
-    font-size: 1rem !important;
-    letter-spacing: 1px !important;
+    font-family: 'Open Sans', sans-serif !important;
+    letter-spacing: 0.5px !important;
     color: #fff !important;
-    box-shadow: 0 4px 14px rgba(241,135,0,.4) !important;
+    box-shadow: 0 3px 10px rgba(241,135,0,.35) !important;
     transition: transform .15s, box-shadow .15s !important;
 }
 button[kind="primary"]:hover {
     background: #d97a00 !important;
-    transform: translateY(-2px) !important;
-    box-shadow: 0 6px 20px rgba(241,135,0,.55) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 5px 16px rgba(241,135,0,.5) !important;
 }
 
-/* ── Metriekkaarten ── */
+/* ── Metriekkaarten: wit met groene/oranje accenten ── */
 .metric-row { display: flex; gap: 16px; margin: 20px 0 24px; flex-wrap: wrap; }
 .metric-card {
     flex: 1; min-width: 140px;
-    background: rgba(0,0,0,0.45);
-    border: 1px solid #2e4a28;
+    background: #ffffff;
+    border: 1px solid #e0e8e0;
     border-radius: 10px;
     padding: 18px 20px;
     text-align: center;
-    backdrop-filter: blur(4px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
 }
 .metric-card .icon { font-size: 1.6rem; margin-bottom: 6px; }
-.metric-card .val  { font-size: 1.75rem; font-weight: 800; color: #F18700; line-height:1; font-family:'Barlow Condensed',sans-serif; }
-.metric-card .lbl  { font-size: 0.72rem; color: #88aa80; margin-top: 5px; text-transform: uppercase; letter-spacing: .8px; }
+.metric-card .val  { font-size: 1.75rem; font-weight: 800; color: #13A538; line-height:1; }
+.metric-card .lbl  { font-size: 0.72rem; color: #666666; margin-top: 5px; text-transform: uppercase; letter-spacing: .8px; }
 
-/* ── Hero banner ── */
+/* ── Hero banner: groen vlak met wit logo en tekst ── */
 .hero {
-    background: linear-gradient(135deg, #0a1a07 0%, #163d10 60%, #0a1a07 100%);
-    border-left: 5px solid #F18700;
-    border-top: 1px solid #3DBE29;
-    border-bottom: 1px solid #3DBE29;
-    border-right: 1px solid #2e4a28;
+    background: #13A538;
     border-radius: 10px;
-    padding: 24px 36px;
+    padding: 28px 36px;
     margin-bottom: 24px;
     display: flex;
     align-items: center;
     gap: 20px;
+    box-shadow: 0 4px 16px rgba(19,165,56,.25);
 }
 .hero-title {
-    font-size: 2rem;
+    font-size: 1.9rem;
     font-weight: 800;
-    font-family: 'Barlow Condensed', sans-serif;
     color: #ffffff;
     margin: 0;
-    letter-spacing: 1px;
-    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
-.hero-sub { font-size: 0.88rem; color: #9ecf8e; margin: 6px 0 0; }
+.hero-sub { font-size: 0.88rem; color: rgba(255,255,255,0.85); margin: 5px 0 0; }
 
-/* ── Stop-kaartjes ── */
+/* ── Stop-kaartjes: wit met oranje accent ── */
 .stop-card {
-    background: rgba(0,0,0,0.4);
-    border: 1px solid #2e4a28;
+    background: #ffffff;
+    border: 1px solid #e0e8e0;
     border-left: 4px solid #F18700;
     border-radius: 6px;
     padding: 14px 18px;
@@ -1359,6 +1353,7 @@ button[kind="primary"]:hover {
     display: flex;
     align-items: center;
     gap: 16px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
 }
 .stop-badge {
     background: #F18700;
@@ -1369,33 +1364,32 @@ button[kind="primary"]:hover {
     width: 34px; height: 34px;
     display: flex; align-items: center; justify-content: center;
     flex-shrink: 0;
-    font-family: 'Barlow Condensed', sans-serif;
 }
-.stop-name  { color: #ffffff; font-weight: 600; font-size: .95rem; }
-.stop-coord { color: #7a9a70; font-size: .78rem; margin-top: 2px; }
+.stop-name  { color: #1A1A1A; font-weight: 600; font-size: .95rem; }
+.stop-coord { color: #666666; font-size: .78rem; margin-top: 2px; }
 
-/* ── Discount badge ── */
+/* ── Korting badge ── */
 .discount-badge {
     display: inline-block;
-    background: #3DBE29;
-    color: #000;
-    font-size: .72rem;
+    background: #13A538;
+    color: #ffffff;
+    font-size: .75rem;
     font-weight: 700;
-    padding: 2px 10px;
+    padding: 3px 12px;
     border-radius: 20px;
-    margin-bottom: 8px;
-    letter-spacing: .5px;
+    margin-bottom: 10px;
+    letter-spacing: .4px;
 }
 
 /* ── Divider ── */
-hr { border-color: #2e4a28 !important; }
+hr { border-color: #d8e8d8 !important; }
 
 /* ── Info/fout ── */
 [data-testid="stAlert"] { border-radius: 6px !important; }
 
-/* ── Algemene tekst ── */
-p, li, label { color: #cccccc !important; }
-h1, h2, h3 { color: #ffffff !important; font-family: 'Barlow Condensed', sans-serif !important; }
+/* ── Algemene tekst: donker op lichte achtergrond ── */
+p, li, label { color: #1A1A1A !important; }
+h1, h2, h3 { color: #1A1A1A !important; font-weight: 700 !important; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -1509,10 +1503,10 @@ st.markdown(f"""
 
 if not generate_btn:
     st.markdown(f"""
-    <div style="background:rgba(0,0,0,0.35);border:1px solid #2e4a28;border-radius:10px;
-         padding:40px 32px;text-align:center;">
+    <div style="background:#ffffff;border:1px solid #d8e8d8;border-radius:10px;
+         padding:48px 32px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
       <div style="font-size:2.5rem;margin-bottom:14px">👈</div>
-      <div style="font-size:1.1rem;color:#cccccc;font-weight:600;">
+      <div style="font-size:1.1rem;color:#444444;font-weight:600;">
         {T('welcome_text')} <b style="color:#F18700">{T('welcome_btn')}</b>
       </div>
     </div>
@@ -1624,15 +1618,15 @@ besparing_str  = f"€ {bf['besparing']:,.0f}".replace(",", ".")
 diesel_tot_str = f"€ {bf['totaal_diesel']:,.0f}".replace(",", ".")
 cng_tot_str    = f"€ {bf['totaal_cng']:,.0f}".replace(",", ".")
 co2_saved_ton  = bf["co2_voordeel"] / 1000
-_OG_GREEN = "#3DBE29"
+_OG_GREEN = "#13A538"
 
 st.markdown(f"""
-<hr style="border-color:#2e4a28;margin:8px 0 20px"/>
+<hr style="border-color:#d8e8d8;margin:8px 0 20px"/>
 <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
   <div style="font-size:1.5rem">🌿</div>
-  <div style="font-size:1.1rem;font-weight:700;color:#ffffff;font-family:'Barlow Condensed',sans-serif;letter-spacing:.5px;">
+  <div style="font-size:1.1rem;font-weight:700;color:#1A1A1A;font-family:'Open Sans',sans-serif;">
     {T('cost_section_title')}
-    <span style="font-size:.8rem;font-weight:400;color:#7a9a70;margin-left:8px">
+    <span style="font-size:.8rem;font-weight:400;color:#666666;margin-left:8px">
       {T('cost_section_sub')} · {total_km:.0f} km
     </span>
   </div>
@@ -1676,31 +1670,31 @@ with st.expander(T("table_expander"), expanded=True):
         bes = ev["diesel_kosten"] - ev["cng_kosten"]
         rows_html += (
             f"<div style='display:grid;grid-template-columns:2fr 1.2fr .8fr 1fr 1fr 1fr;"
-            f"gap:6px;padding:8px 12px;border-bottom:1px solid #1e3a18;"
-            f"font-size:.82rem;color:#bbbbbb;'>"
-            f"<div style='color:#ffffff;font-weight:500'>{ev['label']}</div>"
-            f"<div>{ev['land']}</div>"
-            f"<div>{ev['segment_km']:.0f} km</div>"
-            f"<div style='color:#ff7043'>€ {ev['diesel_kosten']:.0f}<br>"
-            f"<span style='font-size:.68rem;color:#777'>{ev['diesel_l']:.0f}L @ €{ev['diesel_prijs']:.3f}</span></div>"
+            f"gap:6px;padding:8px 12px;border-bottom:1px solid #e8f0e8;"
+            f"font-size:.82rem;color:#333333;background:#ffffff;'>"
+            f"<div style='color:#1A1A1A;font-weight:600'>{ev['label']}</div>"
+            f"<div style='color:#444444'>{ev['land']}</div>"
+            f"<div style='color:#444444'>{ev['segment_km']:.0f} km</div>"
+            f"<div style='color:#c0392b'>€ {ev['diesel_kosten']:.0f}<br>"
+            f"<span style='font-size:.68rem;color:#999'>{ev['diesel_l']:.0f}L @ €{ev['diesel_prijs']:.3f}</span></div>"
             f"<div style='color:#F18700'>€ {ev['cng_kosten']:.0f}<br>"
-            f"<span style='font-size:.68rem;color:#777'>{ev['cng_kg']:.0f}kg @ €{ev['cng_prijs']:.3f}</span></div>"
+            f"<span style='font-size:.68rem;color:#999'>{ev['cng_kg']:.0f}kg @ €{ev['cng_prijs']:.3f}</span></div>"
             f"<div style='color:{_OG_GREEN};font-weight:700'>€ {bes:.0f}</div>"
             f"</div>"
         )
     rows_html += (
         f"<div style='display:grid;grid-template-columns:2fr 1.2fr .8fr 1fr 1fr 1fr;"
-        f"gap:6px;padding:10px 12px;background:rgba(0,0,0,0.4);border-radius:0 0 8px 8px;"
-        f"font-size:.85rem;font-weight:700;color:#ffffff;font-family:\"Barlow Condensed\",sans-serif;'>"
+        f"gap:6px;padding:10px 12px;background:#f0f8f2;border-radius:0 0 8px 8px;"
+        f"font-size:.85rem;font-weight:700;color:#1A1A1A;'>"
         f"<div>{T('table_total')}</div><div></div><div>{total_km:.0f} km</div>"
-        f"<div style='color:#ff7043'>{diesel_tot_str}</div>"
+        f"<div style='color:#c0392b'>{diesel_tot_str}</div>"
         f"<div style='color:#F18700'>{cng_tot_str}</div>"
         f"<div style='color:{_OG_GREEN}'>{besparing_str}</div>"
         f"</div>"
     )
     st.markdown(
-        f"<div style='border:1px solid #2e4a28;border-radius:9px;overflow:hidden;"
-        f"margin-bottom:8px;background:rgba(0,0,0,0.25);'>{header}{rows_html}</div>",
+        f"<div style='border:1px solid #d8e8d8;border-radius:9px;overflow:hidden;"
+        f"margin-bottom:8px;box-shadow:0 2px 8px rgba(0,0,0,0.06);'>{header}{rows_html}</div>",
         unsafe_allow_html=True,
     )
 
